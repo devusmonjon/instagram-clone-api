@@ -4,10 +4,14 @@ import { MailService } from './mail.service';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Otp, OtpSchema } from './otp.model';
+import { User, UserSchema } from 'src/user/user.model';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }]),
+    MongooseModule.forFeature([
+      { name: Otp.name, schema: OtpSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
     ConfigModule,
   ],
   controllers: [MailController],

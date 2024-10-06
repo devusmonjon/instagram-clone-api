@@ -6,7 +6,12 @@ import { MailOptions } from './mail.interface';
 export class MailController {
   constructor(private readonly mailService: MailService) {}
   @Post('send-otp')
-  async sendOtp(@Body() { email }: { email: string }) {
-    return await this.mailService.sendOtpVerification(email);
+  async sendOtp(@Body() dto: { email: string }) {
+    return await this.mailService.sendOtpVerification(dto.email);
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(@Body() dto: { email: string; code: string }) {
+    return await this.mailService.verifyOtp(dto.email, dto.code);
   }
 }

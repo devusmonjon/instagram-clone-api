@@ -9,7 +9,7 @@ export class Otp {
   email: string;
 
   @Prop()
-  otp: string;
+  code: string;
 
   @Prop()
   expireAt: Date;
