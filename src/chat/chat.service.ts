@@ -15,7 +15,6 @@ export class ChatService {
   async saveMessage(token: string, content: string): Promise<Message> {
     console.log(token, content);
     const { _id }: { _id: string } = JSON.parse(atob(token.split('.')[1]));
-    console.log(_id);
 
     const user = await this.userModel.findOne({
       _id,

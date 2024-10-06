@@ -18,7 +18,6 @@ export class MailService {
         pass: configService.get<string>('SMTP_PASSWORD'), // Email parol
       },
     };
-    console.log(smtpOptions);
 
     this.transporter = nodemailer.createTransport(smtpOptions);
   }
