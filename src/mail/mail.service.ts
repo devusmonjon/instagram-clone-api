@@ -89,7 +89,8 @@ export class MailService {
     const validOtp = await compare(code, otpCode);
     if (!validOtp) throw new BadRequestException('Invalid code');
 
-    await this.otpModel.deleteMany({ email: email });
+    await this.userModel.updateOne({ email }, { emailActivated: true });
+    await this.otpModel.deleteMany({ email });
 
     return {
       success: true,

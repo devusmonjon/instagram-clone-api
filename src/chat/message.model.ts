@@ -9,6 +9,9 @@ export class Message {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   sender: User;
 
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  receiver: User; // Receiverni qo'shamiz
+
   @Prop({ required: true })
   content: string;
 

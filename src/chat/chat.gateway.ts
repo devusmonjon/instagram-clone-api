@@ -20,10 +20,15 @@ export class ChatGateway {
 
   @SubscribeMessage('sendMessage')
   async handleMessage(
-    @MessageBody('email') email: string,
+    @MessageBody('senderUsername') senderUsername: string, // yuboruvchi username
+    @MessageBody('receiverUsername') receiverUsername: string, // qabul qiluvchi username
     @MessageBody('message') message: string,
   ) {
-    const newMessage = await this.chatService.saveMessage(email, message);
+    const newMessage = await this.chatService.saveMessage(
+      senderUsername,
+      receiverUsername,
+      message,
+    );
     this.server.emit('receiveMessage', newMessage);
   }
 }

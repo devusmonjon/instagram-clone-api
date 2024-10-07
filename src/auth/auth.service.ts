@@ -20,10 +20,10 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existUser = await this.isExistUser(dto.email);
+    const existUser = await this.isExistUser(dto.username, dto.email);
     if (existUser)
       throw new ConflictException(
-        'User with that email is already exists in the system',
+        'User with that email or username is already exists in the system',
       );
 
     const salt = await genSalt(10);
@@ -33,6 +33,7 @@ export class AuthService {
       ...dto,
       fullName: dto.full_name,
       password: passwordHash,
+      emailActivated: false,
       role: 'USER',
     });
 
@@ -42,7 +43,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const existUser = await this.isExistUser(dto.email);
+    const existUser = await this.isExistUser(dto.username);
     if (!existUser) throw new UnauthorizedException('User not found');
 
     const passwordCompare = await compare(dto.password, existUser.password);
@@ -69,8 +70,13 @@ export class AuthService {
     return { user: this.getUserField(user), ...token };
   }
 
-  async isExistUser(email: string): Promise<UserDocument | false> {
-    const existUser = await this.userModel.findOne({ email });
+  async isExistUser(
+    username: string,
+    email: string | boolean = false,
+  ): Promise<UserDocument | false> {
+    const existUserWithUsername = await this.userModel.findOne({ username });
+    const existUserWithEmail = await this.userModel.findOne({ email });
+    const existUser = existUserWithUsername || existUserWithEmail;
     return existUser ? existUser : false;
   }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Message } from './message.model';
@@ -12,19 +12,23 @@ export class ChatService {
   ) {}
 
   // Xabarni saqlash
-  async saveMessage(token: string, content: string): Promise<Message> {
-    console.log(token, content);
-    const { _id }: { _id: string } = JSON.parse(atob(token.split('.')[1]));
-
-    const user = await this.userModel.findOne({
-      _id,
+  async saveMessage(
+    senderUsername: string,
+    receiverUsername: string,
+    content: string,
+  ): Promise<Message> {
+    const sender = await this.userModel.findOne({ username: senderUsername });
+    const receiver = await this.userModel.findOne({
+      username: receiverUsername,
     });
-    if (!user) {
+
+    if (!sender || !receiver) {
       throw new Error('Foydalanuvchi topilmadi');
     }
 
     const newMessage = new this.messageModel({
-      sender: user._id, // Senderni foydalanuvchiga bog'laymiz
+      sender: sender._id,
+      receiver: receiver._id,
       content,
     });
 
@@ -32,15 +36,22 @@ export class ChatService {
 
     return this.messageModel
       .findById(newMessage._id)
-      .populate('sender', 'email fullName')
-      .exec(); // Xabarni saqlagandan keyin foydalanuvchini to'liq ma'lumotlari bilan qaytaramiz
+      .populate('sender', 'username fullName')
+      .populate('receiver', 'username fullName')
+      .exec();
   }
 
-  // Barcha xabarlarni olish
-  async getMessages(): Promise<Message[]> {
+  // Foydalanuvchi o'rtasidagi xabarlarni olish
+  async getMessages(username: string): Promise<Message[]> {
+    const user = await this.userModel.findOne({ username });
+    if (!user) {
+      throw new BadRequestException('Foydalanuvchi topilmadi');
+    }
+
     return this.messageModel
-      .find()
-      .populate('sender', 'email fullName') // Xabarlar bilan bog'liq foydalanuvchilarni olish
+      .find({ $or: [{ sender: user._id }, { receiver: user._id }] })
+      .populate('sender', 'username fullName')
+      .populate('receiver', 'username fullName')
       .exec();
   }
 }

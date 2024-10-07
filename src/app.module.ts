@@ -7,6 +7,10 @@ import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
 import { MailModule } from './mail/mail.module';
 import { ChatModule } from './chat/chat.module';
+import { UploadModule } from './upload/upload.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -21,6 +25,11 @@ import { ChatModule } from './chat/chat.module';
     UserModule,
     MailModule,
     ChatModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'), // Static fayllar papkasi
+      serveRoot: '/uploads', // URL orqali qaysi endpoint orqali fayllarga murojaat qilish
+    }),
+    UploadModule,
   ],
 })
 export class AppModule {}
