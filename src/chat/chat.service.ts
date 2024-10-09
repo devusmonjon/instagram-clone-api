@@ -23,8 +23,12 @@ export class ChatService {
     });
 
     if (!sender || !receiver) {
-      throw new Error('Foydalanuvchi topilmadi');
+      throw new BadRequestException('Foydalanuvchi topilmadi');
     }
+
+    console.log(sender, receiver, content);
+
+    if (!content) throw new BadRequestException('Xabar kiritish majburiy');
 
     const newMessage = new this.messageModel({
       sender: sender._id,
