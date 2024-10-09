@@ -23,17 +23,19 @@ export class UserController {
   @Auth()
   async followUser(
     @User('username') follower: string,
+    @User() user: UserDocument,
     @Param('username') username: string,
   ) {
-    return this.userService.follow(follower, username);
+    return this.userService.follow(follower, username, user);
   }
 
   @Post('unfollow/:username')
   @Auth()
   async unfollowUser(
     @User('username') follower: string,
+    @User() user: UserDocument,
     @Param('username') username: string,
   ) {
-    return this.userService.unfollow(follower, username);
+    return this.userService.unfollow(follower, username, user);
   }
 }

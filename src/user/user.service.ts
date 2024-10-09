@@ -21,41 +21,73 @@ export class UserService {
     return user;
   }
 
-  async follow(follower, followTo) {
+  async follow(follower: string, followTo: string, currentUser: UserDocument) {
     if (follower === followTo) throw new BadRequestException('Self follow');
     const user = await this.userModel.findOne({ username: followTo });
 
     if (!user) throw new NotFoundException('User not found');
 
-    if (user.followers.includes(follower)) {
-      // user.followers = user.followers.filter((id) => id !== follower);
+    const index = currentUser.following.findIndex(
+      (user) => user.username === followTo,
+    );
+    if (index !== -1) {
       throw new BadRequestException('Already followed');
-    } else {
-      user.followers.push(follower);
     }
+
+    user.followers.push({
+      username: follower,
+      // @ts-ignore
+      _id: currentUser._id,
+      fullName: currentUser.fullName,
+      photo: currentUser.photo,
+    } as UserDocument);
+    currentUser.following.push({
+      username: followTo,
+      // @ts-ignore
+      _id: user._id,
+      fullName: user.fullName,
+      photo: user.photo,
+    });
+
     await this.userModel.updateOne({ username: followTo }, user);
+    await this.userModel.updateOne({ username: follower }, currentUser);
 
     return {
-      followed: !user.followers.includes(follower),
+      followed: index === -1,
       follower_username: follower,
       follow_to: followTo,
     };
   }
 
-  async unfollow(follower, followTo) {
-    if (follower === followTo) throw new BadRequestException('Self follow');
+  async unfollow(
+    follower: string,
+    followTo: string,
+    currentUser: UserDocument,
+  ) {
+    if (follower === followTo) throw new BadRequestException('Self unfollow');
     const user = await this.userModel.findOne({ username: followTo });
 
     if (!user) throw new NotFoundException('User not found');
 
-    if (!user.followers.includes(follower)) {
-      throw new BadRequestException('Not followed');
-    } else {
-      user.followers = user.followers.filter((id) => id !== follower);
+    const index = currentUser.following.findIndex(
+      (user) => user.username === followTo,
+    );
+    if (index === -1) {
+      throw new BadRequestException('Already unfollowed');
     }
+
+    user.followers = user.followers.filter(
+      (user) => user.username !== follower,
+    );
+    currentUser.following = currentUser.following.filter(
+      (user) => user.username !== followTo,
+    );
+
     await this.userModel.updateOne({ username: followTo }, user);
+    await this.userModel.updateOne({ username: follower }, currentUser);
+
     return {
-      followed: false,
+      unfollowed: index !== -1,
       follower_username: follower,
       follow_to: followTo,
     };
@@ -69,8 +101,8 @@ export class UserService {
       _id: user._id,
       username: user.username,
       fullName: user.fullName,
-      followers: user.followers.length,
-      following: user.following.length,
+      followers: user.followers,
+      following: user.following,
       photo: user.photo,
     };
   }
