@@ -59,11 +59,18 @@ export class AuthService {
     if (!refreshToken)
       throw new UnauthorizedException('Refresh token not found');
 
-    const result = await this.jwtService.verifyAsync(refreshToken);
+    let result = null;
+    try {
+      result = await this.jwtService.verifyAsync(refreshToken);
+    } catch (e) {
+      throw new UnauthorizedException('Token ivalid or expired');
+    }
 
     if (!result) throw new UnauthorizedException('Token ivalid or expired');
 
     const user = await this.userModel.findById(result._id);
+
+    if (!user) throw new UnauthorizedException('User not found');
 
     const token = await this.issueTokenPari(String(user._id));
 

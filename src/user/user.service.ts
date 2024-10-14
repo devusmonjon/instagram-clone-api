@@ -7,18 +7,52 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from './user.model';
 import { User } from './decorators/user.decorator';
 import { Model } from 'mongoose';
+import { Post } from 'src/post/post.model';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(Post.name) private readonly postModel: Model<Post>,
   ) {}
 
   async byId(_id: string) {
     const user = await this.userModel.findById(_id);
 
     if (!user) throw new NotFoundException('User not found');
+    user.password = 'No access to preview password';
+
+    const userPosts = await this.postModel.find({ owner: _id });
+
+    if (userPosts) {
+      user.posts = userPosts;
+    }
+
     return user;
+  }
+
+  async getFeed(_id: string, limit: number) {
+    const user = await this.userModel.findById(_id);
+    if (!user) throw new NotFoundException('User not found');
+
+    const followings = user.following.map((user: UserDocument) => user._id);
+
+    const followingPosts = await this.postModel
+      .find({
+        owner: { $in: followings },
+      })
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const totalPosts = await this.postModel.countDocuments({
+      owner: { $in: followings },
+    });
+
+    return {
+      posts: followingPosts,
+      limit,
+      total: totalPosts,
+    };
   }
 
   async follow(follower: string, followTo: string, currentUser: UserDocument) {
@@ -97,6 +131,11 @@ export class UserService {
     const user = await this.userModel.findOne({ username });
 
     if (!user) throw new NotFoundException('User not found');
+    const userPosts = await this.postModel.find({ owner: user._id });
+
+    if (userPosts) {
+      user.posts = userPosts;
+    }
     return {
       _id: user._id,
       username: user.username,
@@ -104,6 +143,9 @@ export class UserService {
       followers: user.followers,
       following: user.following,
       photo: user.photo,
+      posts: user.posts,
+      emailActivated: user.emailActivated,
+      reels: user.reels,
     };
   }
 }

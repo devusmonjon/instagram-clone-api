@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { RoleUser } from './user.interface';
+import { Post } from 'src/post/post.model';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -33,6 +34,12 @@ export class User {
 
   @Prop({ type: Types.ObjectId, ref: 'User', default: [] })
   following: User[];
+
+  @Prop({ type: Types.ObjectId, ref: 'Post', default: [] })
+  posts: Post[];
+
+  @Prop({ type: Types.ObjectId, ref: 'Reels', default: [] })
+  reels: Types.ObjectId[];
 
   @Prop({ required: true, default: 'USER' })
   role: RoleUser;
