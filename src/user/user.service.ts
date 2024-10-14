@@ -62,16 +62,7 @@ export class UserService {
   }
 
   async getAll(limit: number) {
-    const totalUsers = await this.postModel.countDocuments();
-    const users = await this.userModel
-      .find()
-      .limit(limit)
-      .sort({ createdAt: -1 });
-    return {
-      users,
-      total: totalUsers,
-      limit,
-    };
+    return await this.userModel.find().limit(limit).sort({ createdAt: -1 });
   }
 
   async follow(follower: string, followTo: string, currentUser: UserDocument) {
