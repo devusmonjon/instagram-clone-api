@@ -55,6 +55,14 @@ export class UserService {
     };
   }
 
+  async search(q: string) {
+    return this.userModel.find({ username: { $regex: q, $options: 'i' } });
+  }
+
+  async getAll(limit: number) {
+    return this.userModel.find().limit(limit).sort({ createdAt: -1 });
+  }
+
   async follow(follower: string, followTo: string, currentUser: UserDocument) {
     if (follower === followTo) throw new BadRequestException('Self follow');
     const user = await this.userModel.findOne({ username: followTo });

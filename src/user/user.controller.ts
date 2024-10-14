@@ -20,6 +20,16 @@ export class UserController {
     return this.userService.getFeed(_id, limit);
   }
 
+  @Get('search')
+  async search(@Query('q') q: string) {
+    return this.userService.search(q);
+  }
+
+  @Get('all')
+  async getAll(@Query('limit') limit: number = 10) {
+    return this.userService.getAll(limit);
+  }
+
   @Get('profile/:username')
   async getProfileByUsername(@Param('username') username: string) {
     return this.userService.getUser(username);
