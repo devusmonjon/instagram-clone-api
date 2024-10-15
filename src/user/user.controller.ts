@@ -26,8 +26,9 @@ export class UserController {
   }
 
   @Get('all')
-  async getAll(@Query('limit') limit: number = 10) {
-    return this.userService.getAll(limit);
+  @Auth()
+  async getAll(@Query('limit') limit: number = 10, @User('_id') _id: string) {
+    return this.userService.getAll(limit, _id);
   }
 
   @Get('profile/:username')

@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -44,11 +46,11 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const existUser = await this.isExistUser(dto.username);
-    if (!existUser) throw new UnauthorizedException('User not found');
+    if (!existUser) throw new NotFoundException('User not found');
 
     const passwordCompare = await compare(dto.password, existUser.password);
 
-    if (!passwordCompare) throw new UnauthorizedException('Wrong password');
+    if (!passwordCompare) throw new BadRequestException('Wrong password');
 
     const token = await this.issueTokenPari(String(existUser._id));
 
@@ -56,21 +58,20 @@ export class AuthService {
   }
 
   async getNewTokens({ refreshToken }: TokenDto) {
-    if (!refreshToken)
-      throw new UnauthorizedException('Refresh token not found');
+    if (!refreshToken) throw new NotFoundException('Refresh token not found');
 
     let result = null;
     try {
       result = await this.jwtService.verifyAsync(refreshToken);
     } catch (e) {
-      throw new UnauthorizedException('Token ivalid or expired');
+      throw new BadRequestException('Token ivalid or expired');
     }
 
-    if (!result) throw new UnauthorizedException('Token ivalid or expired');
+    if (!result) throw new BadRequestException('Token ivalid or expired');
 
     const user = await this.userModel.findById(result._id);
 
-    if (!user) throw new UnauthorizedException('User not found');
+    if (!user) throw new NotFoundException('User not found');
 
     const token = await this.issueTokenPari(String(user._id));
 

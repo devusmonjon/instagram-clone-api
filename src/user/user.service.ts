@@ -17,10 +17,9 @@ export class UserService {
   ) {}
 
   async byId(_id: string) {
-    const user = await this.userModel.findById(_id);
+    const user = await this.userModel.findById(_id).select('-password');
 
     if (!user) throw new NotFoundException('User not found');
-    user.password = 'No access to preview password';
 
     const userPosts = await this.postModel.find({ owner: _id });
 
@@ -61,8 +60,18 @@ export class UserService {
     });
   }
 
-  async getAll(limit: number) {
-    return await this.userModel.find().limit(limit).sort({ createdAt: -1 });
+  async getAll(limit: number, current_id?: string) {
+    // without password
+
+    if (current_id) {
+      return await this.userModel
+        .find({ _id: { $ne: current_id } })
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .select('-password');
+    } else {
+      throw new NotFoundException('User not found');
+    }
   }
 
   async follow(follower: string, followTo: string, currentUser: UserDocument) {
@@ -89,8 +98,6 @@ export class UserService {
       username: followTo,
       // @ts-ignore
       _id: user._id,
-      fullName: user.fullName,
-      photo: user.photo,
     });
 
     await this.userModel.updateOne({ username: followTo }, user);
