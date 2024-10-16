@@ -88,14 +88,9 @@ export class UserService {
     }
 
     user.followers.push({
-      username: follower,
-      // @ts-ignore
       _id: currentUser._id,
-      fullName: currentUser.fullName,
-      photo: currentUser.photo,
     } as UserDocument);
     currentUser.following.push({
-      username: followTo,
       // @ts-ignore
       _id: user._id,
     });
