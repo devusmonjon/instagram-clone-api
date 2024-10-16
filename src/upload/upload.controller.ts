@@ -32,8 +32,15 @@ export class UploadController {
   }
 
   @Get('list')
-  getUploadedFiles(@Res() res: Response) {
-    const files = this.uploadService.getUploadedFiles();
-    return res.status(200).json({ files });
+  async getUploadedFiles(@Res() res: Response) {
+    const files = await this.uploadService.getUploadedFiles();
+    const count = files.length;
+    const message =
+      count > 0
+        ? count > 1
+          ? `${count} files found.`
+          : `${count} file found.`
+        : 'No files found.';
+    return res.status(200).json({ message, files });
   }
 }
