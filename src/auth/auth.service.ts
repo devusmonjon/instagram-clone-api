@@ -106,6 +106,9 @@ export class AuthService {
       _id: user._id,
       email: user.email,
       fullName: user.fullName,
+      username: user.username,
+      photo: user.photo,
+      emailActivated: user.emailActivated,
     };
   }
 }
