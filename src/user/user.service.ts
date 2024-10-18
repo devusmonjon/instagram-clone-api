@@ -74,6 +74,15 @@ export class UserService {
     }
   }
 
+  async getUsernames() {
+    const res = await this.userModel
+      .find()
+      .sort({ createdAt: -1 })
+      .select('username');
+    const mappedRes = res.map((user) => user.username);
+    return mappedRes;
+  }
+
   async follow(follower: string, followTo: string, currentUser: UserDocument) {
     if (follower === followTo) throw new BadRequestException('Self follow');
     const user = await this.userModel.findOne({ username: followTo });

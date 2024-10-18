@@ -31,6 +31,11 @@ export class UserController {
     return this.userService.getAll(limit, _id);
   }
 
+  @Get('usernames')
+  async getUsernames() {
+    return this.userService.getUsernames();
+  }
+
   @Get('profile/:username')
   async getProfileByUsername(@Param('username') username: string) {
     return this.userService.getUser(username);
