@@ -35,6 +35,10 @@ export class UserService {
     if (!user) throw new NotFoundException('User not found');
 
     const followings = user.following.map((user: UserDocument) => user._id);
+    followings.push(user._id);
+    // random sort
+
+    followings.sort(() => Math.random() - 0.5);
 
     const followingPosts = await this.postModel
       .find({
