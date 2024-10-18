@@ -18,4 +18,15 @@ export class PostController {
   async getPost(@Param('username') username: string, @Param('id') id: string) {
     return this.postService.getPost(username, id);
   }
+
+  @Get(':username')
+  @Auth()
+  async getPosts(@Param('username') username: string) {
+    return this.postService.getAllUserPosts(username);
+  }
+
+  @Get()
+  async getAllPosts() {
+    return this.postService.getAllPosts();
+  }
 }

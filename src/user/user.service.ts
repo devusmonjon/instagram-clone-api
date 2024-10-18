@@ -18,15 +18,10 @@ export class UserService {
 
   async byId(_id: string) {
     const user = await this.userModel.findById(_id).select('-password');
-
     if (!user) throw new NotFoundException('User not found');
 
-    const userPosts = await this.postModel.find({ owner: _id });
-
-    if (userPosts) {
-      user.posts = userPosts;
-    }
-
+    const userPosts = await this.postModel.find({ owner: _id }).select('');
+    user.posts = userPosts;
     return user;
   }
 
@@ -34,25 +29,33 @@ export class UserService {
     const user = await this.userModel.findById(_id);
     if (!user) throw new NotFoundException('User not found');
 
-    const followings = user.following.map((user: UserDocument) => user._id);
+    const followings = user.following.map((u: UserDocument) => u._id);
     followings.push(user._id);
-    // random sort
-
     followings.sort(() => Math.random() - 0.5);
 
     const followingPosts = await this.postModel
-      .find({
-        owner: { $in: followings },
-      })
+      .find({ owner: { $in: followings } })
       .limit(limit)
       .sort({ createdAt: -1 });
+
+    const postsWithOwner = await Promise.all(
+      followingPosts.map(async (post) => ({
+        ...post.toObject(),
+        owner: await this.userModel
+          .findById(post.owner)
+          .select('username')
+          .select('photo')
+          .select('email')
+          .select('fullName'),
+      })),
+    );
 
     const totalPosts = await this.postModel.countDocuments({
       owner: { $in: followings },
     });
 
     return {
-      posts: followingPosts,
+      posts: postsWithOwner,
       limit,
       total: totalPosts,
     };
@@ -159,10 +162,12 @@ export class UserService {
     const user = await this.userModel.findOne({ username });
 
     if (!user) throw new NotFoundException('User not found');
-    const userPosts = await this.postModel.find({ owner: user._id });
+    const userPosts = await this.postModel
+      .find({ owner: user._id })
+      .select('_id');
 
     if (userPosts) {
-      user.posts = userPosts;
+      user.posts = userPosts.map((post) => post._id) as any;
     }
     return {
       _id: user._id,
