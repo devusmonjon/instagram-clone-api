@@ -10,7 +10,7 @@ export class Post {
   owner: User;
 
   @Prop({ required: true })
-  content: string[];
+  content: { url: string; type: 'VIDEO' | 'AUDIO' | 'IMAGE' }[];
 
   @Prop({ required: true })
   content_alt: string;
@@ -47,6 +47,9 @@ export class Post {
 
   @Prop({ required: false, default: true })
   reels: boolean;
+
+  @Prop({ required: false, default: [] })
+  comments: [];
 
   @Prop({ required: false, default: '' })
   location: string;
