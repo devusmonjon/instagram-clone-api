@@ -18,6 +18,9 @@ export class Post {
   @Prop({ required: true })
   caption: string;
 
+  @Prop({ required: true })
+  title: string;
+
   @Prop({ required: false, default: false })
   private: boolean;
 

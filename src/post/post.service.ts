@@ -1,8 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/user/user.model';
-import { Post } from './post.model';
+import { Post, PostDocument } from './post.model';
 
 @Injectable()
 export class PostService {
@@ -11,8 +15,33 @@ export class PostService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  async create(dto: any, user: UserDocument) {
-    return this.postModel.create({ ...dto, owner: user._id });
+  async create(dto: PostDocument, user: UserDocument) {
+    if (!user) throw new NotFoundException('User not found');
+    if (!dto.content_alt)
+      throw new BadRequestException('content_alt is required');
+    if (!dto.content && dto.content.length > 0)
+      throw new BadRequestException('Content is not allowed');
+    dto.content.forEach((content, idx: number) => {
+      if (!content.url)
+        throw new BadRequestException(`you need to provide url #${idx + 1}`);
+      if (
+        !(content.type === 'AUDIO') &&
+        !(content.type === 'IMAGE') &&
+        !(content.type === 'VIDEO')
+      )
+        throw new BadRequestException(
+          `file type is only "VIDEO" or "AUDIO" or "IMAGE" #${idx + 1}`,
+        );
+    });
+    const post = await this.postModel.create({
+      owner: user._id,
+      content: dto.content,
+      content_alt: dto.content_alt,
+      location: dto.location,
+      caption: dto.caption,
+      title: dto.title || dto.content_alt,
+    });
+    return post;
   }
 
   async getPost(username: string, id: string) {
