@@ -181,4 +181,28 @@ export class UserService {
       reels: user.reels,
     };
   }
+
+  async updateUser(
+    id: string,
+    dto: UserDocument & {
+      full_name: string;
+    },
+  ) {
+    const user = await this.userModel.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    if (!dto.full_name) dto.full_name = user.fullName;
+    if (!dto.username) dto.username = user.username;
+    if (!dto.email) dto.email = user.email;
+    if (!dto.photo) dto.photo = user.photo;
+    if (!dto.bio) dto.bio = user.bio;
+
+    const updatedUser = {
+      fullName: dto.full_name,
+      username: dto.username,
+      email: dto.email,
+      photo: dto.photo,
+      bio: dto.bio,
+    };
+    return this.userModel.findByIdAndUpdate(id, updatedUser, { new: true });
+  }
 }

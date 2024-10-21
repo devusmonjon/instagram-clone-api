@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { User } from 'src/user/decorators/user.decorator';
 import { UserDocument } from 'src/user/user.model';
@@ -28,5 +28,24 @@ export class PostController {
   @Get()
   async getAllPosts() {
     return this.postService.getAllPosts();
+  }
+
+  @Post(':id/like')
+  @Auth()
+  async likePost(@Param('id') id: string, @User() user: UserDocument) {
+    return this.postService.likePost(id, user);
+  }
+
+  @Delete(':id')
+  @Auth()
+  async deletePost(@Param('id') id: string, @User() user: UserDocument) {
+    return this.postService.deletePost(id, user);
+  }
+
+  @Put(':id')
+  @Auth()
+  async updatePost(@Param('id') id: string, @Body() dto: any, @User() user: UserDocument) {
+    
+    return this.postService.updatePost(id, dto, user);
   }
 }

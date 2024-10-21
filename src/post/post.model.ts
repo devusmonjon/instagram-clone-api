@@ -36,6 +36,9 @@ export class Post {
   @Prop({ required: false, default: true })
   comments_enabled: boolean;
 
+  @Prop({ required: false, default: [] })
+  likes: string[];
+
   @Prop({ required: false, default: 0 })
   likes_count: number;
 

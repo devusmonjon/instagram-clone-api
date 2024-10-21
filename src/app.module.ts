@@ -10,6 +10,9 @@ import { ChatModule } from './chat/chat.module';
 import { UploadModule } from './upload/upload.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { CommentController } from './comment/comment.controller';
+import { CommentService } from './comment/comment.service';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -30,6 +33,7 @@ import { join } from 'path';
       serveRoot: '/uploads', // URL orqali qaysi endpoint orqali fayllarga murojaat qilish
     }),
     UploadModule,
+    CommentModule,
   ],
 })
 export class AppModule {}

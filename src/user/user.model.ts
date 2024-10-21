@@ -38,6 +38,9 @@ export class User {
   @Prop({ type: Types.ObjectId, ref: 'Post', default: [] })
   posts: Post[];
 
+  @Prop({ required: false, default: '' })
+  bio: string;
+
   @Prop({ type: Types.ObjectId, ref: 'Reels', default: [] })
   reels: Types.ObjectId[];
 
