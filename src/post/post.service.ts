@@ -16,6 +16,7 @@ export class PostService {
   ) {}
 
   async create(dto: PostDocument, user: UserDocument) {
+    console.log(user);
     if (!user) throw new NotFoundException('User not found');
     if (!dto.content_alt)
       throw new BadRequestException('content_alt is required');
@@ -98,10 +99,11 @@ export class PostService {
     return await post.save();
   }
 
-  async deletePost(_id: string, user: UserDocument) {
+  async deletePost(_id: string, userId: string) {
     const post = await this.postModel.findOne({_id: String(_id)});
     if (!post) throw new NotFoundException('Post not found');
-    if (post.owner != user._id as any) throw new BadRequestException('Only owner can delete post');
+    console.log(post.owner, userId);
+    if (String(post.owner) != String(userId)) throw new BadRequestException('Only owner can delete post');
     return await this.postModel.findByIdAndDelete(_id);
   }
 

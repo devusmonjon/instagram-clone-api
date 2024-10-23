@@ -38,8 +38,8 @@ export class PostController {
 
   @Delete(':id')
   @Auth()
-  async deletePost(@Param('id') id: string, @User() user: UserDocument) {
-    return this.postService.deletePost(id, user);
+  async deletePost(@Param('id') id: string, @User("id") userId: string) {
+    return this.postService.deletePost(id, userId);
   }
 
   @Put(':id')
